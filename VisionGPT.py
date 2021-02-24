@@ -4,6 +4,7 @@ from torch.nn import CrossEntropyLoss
 import torch 
 import os 
 
+
 class VisionGPT(GPT2PreTrainedModel): 
 
     def __init__(self, config):
@@ -23,12 +24,14 @@ class VisionGPT(GPT2PreTrainedModel):
         hidden_states = transformer_outputs[0] 
 
         lm_logits = self.lm_head(hidden_states) 
-        outputs = (lm_logits,) + transformer_outputs[1:] 
+        outputs = (lm_logits,) + transformer_outputs
         if labels is not None: 
             loss_text_fct = CrossEntropyLoss(ignore_index=-100) 
             loss_text = loss_text_fct(lm_logits.squeeze(0), labels.squueeze(0)) 
             outputs = (loss_text, ) + outputs 
         return outputs 
+
+
 
 
 
