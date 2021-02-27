@@ -7,19 +7,27 @@ from VisionGPT import VisionGPT
 SPECIAL_TOKENS_DICT = {'bos_token':'<bos>', 'eos_token':'eos', 'additional_special_tokens': ['<img>', '<txt>'], 'pad_token':'<pad>'}
 
 
+# create the key-value memory bank 
 def memory_bank_construction(model, dataset):
     for instance in dataset:
         img_feature, txt_ids, token_type_ids = instance 
-        generate_key(img_feature, txt_ids, token_type_ids, model)
+        # enumerate all subsequence 
+        img_feature_len = img_feature.size(0)
+        for i in range(1, len(txt_ids)-1): 
+            t_txt_ids = txt_ids[:i] 
+            t_token_type_ids = token_type_ids[:img_feature_len+i] 
+            generate_key(img_feature, t_txt_ids, t_token_type_ids, model) 
+            break 
         break 
 
 
+# generate the history hidden state from model outputs as the key 
 def generate_key(img_feature, txt_ids, token_type_ids, model):
     txt_embs = model.transformer.wte(txt_ids) 
     img_embs = model.img_ff(img_feature)
     input_embs = torch.cat((img_embs, txt_embs), 0)
-    res = model(input_embs, token_type_ids)
-    print(res[1][-1].size())
+    hidden_state = model(input_embs, token_type_ids)[1][-1]
+    return hidden_state 
 
 
 if __name__ == "__main__": 
